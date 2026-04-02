@@ -1,0 +1,61 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../Services/auth_service.dart';
+
+class LoginController extends GetxController {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final AuthService _authService = Get.find<AuthService>();
+  
+  var isPasswordVisible = false.obs;
+  var isLoading = false.obs;
+
+  void togglePasswordVisibility() {
+    isPasswordVisible.value = !isPasswordVisible.value;
+  }
+
+  Future<void> login() async {
+    if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
+      isLoading.value = true;
+      try {
+        final success = await _authService.login(
+          emailController.text.trim(),
+          passwordController.text,
+        );
+        
+        if (success) {
+          Get.offNamed('/main');
+        } else {
+          Get.snackbar(
+            'Login Failed',
+            'Invalid email or password',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red.withOpacity(0.1),
+            colorText: Colors.red,
+          );
+        }
+      } catch (e) {
+        Get.snackbar(
+          'Error',
+          'An unexpected error occurred: $e',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } finally {
+        isLoading.value = false;
+      }
+    } else {
+      Get.snackbar(
+        'Required Fields',
+        'Please enter both email and password',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  @override
+  void onClose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.onClose();
+  }
+}
