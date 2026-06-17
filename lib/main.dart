@@ -22,6 +22,8 @@ import 'views/cases/cases_view.dart';
 import 'views/cases/case_details_view.dart';
 import 'views/products/products_view.dart';
 import 'views/calendar/calendar_view.dart';
+import 'views/sales/live_map_view.dart';
+import 'views/sales/accounts_map_view.dart';
 import 'navigation/AppNavigator.dart';
 
 void main() async {
@@ -63,6 +65,8 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/case-details', page: () => const CaseDetailsView()),
         GetPage(name: '/products', page: () => const ProductsView()),
         GetPage(name: '/calendar', page: () => const CalendarView()),
+        GetPage(name: '/live-map', page: () => const LiveMapView()),
+        GetPage(name: '/accounts-map', page: () => const AccountsMapView()),
         GetPage(name: '/main', page: () => const AppNavigator()),
       ],
     );

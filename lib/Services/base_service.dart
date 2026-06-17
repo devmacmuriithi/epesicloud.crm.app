@@ -186,6 +186,39 @@ class BaseService {
         uri.toString(),
       );
     }
+  }
+
+  // MULTIPART UPLOAD
+  Future<dynamic> uploadMultipartFile(String baseUrl, String api, String fileField, String filePath) async {
+    await getToken();
+    var uri = Uri.parse(baseUrl + api);
+
+    print("Final MULTIPART request URL: ${uri.toString()}");
+    print("MULTIPART file: $filePath");
+
+    try {
+      var request = http.MultipartRequest('POST', uri);
+      
+      // Add headers manually
+      request.headers.addAll({
+        'Accept': 'application/json',
+        if (_token != null) 'Authorization': 'Bearer $_token',
+      });
+      
+      request.files.add(await http.MultipartFile.fromPath(fileField, filePath));
+
+      var streamedResponse = await request.send().timeout(const Duration(seconds: TIME_OUT_DURATION));
+      var response = await http.Response.fromStream(streamedResponse);
+      
+      return _processResponse(response);
+    } on SocketException {
+      throw FetchDataException('No Internet connection', uri.toString());
+    } on TimeoutException {
+      throw ApiNotRespondingException(
+        'API not responded in time',
+        uri.toString(),
+      );
+    }
   } //OTHER
 
   dynamic _processResponse(http.Response response) {

@@ -9,6 +9,7 @@ import '../../views/activities/modals/log_call_modal.dart';
 import '../../views/activities/modals/send_email_modal.dart';
 import '../../views/activities/modals/send_sms_modal.dart';
 import '../../Services/lookups_service.dart';
+import '../../widgets/activity_action_bottom_sheet.dart';
 
 
 class DealDetailsView extends StatefulWidget {
@@ -65,7 +66,7 @@ class _DealDetailsViewState extends State<DealDetailsView> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.95,
+        height: MediaQuery.of(context).size.height * 0.8,
         child: _DealNewNoteSheet(controller),
       ),
     );
@@ -1388,12 +1389,25 @@ class _DealDetailsViewState extends State<DealDetailsView> {
 }
 
 // ── Deal-specific New Note Sheet ─────────────────────────────────────────
-class _DealNewNoteSheet extends StatelessWidget {
-  final _titleController = TextEditingController();
-  final _bodyController = TextEditingController();
+class _DealNewNoteSheet extends StatefulWidget {
   final DealDetailsController controller;
 
-  _DealNewNoteSheet(this.controller);
+  const _DealNewNoteSheet(this.controller);
+
+  @override
+  State<_DealNewNoteSheet> createState() => _DealNewNoteSheetState();
+}
+
+class _DealNewNoteSheetState extends State<_DealNewNoteSheet> {
+  final _titleController = TextEditingController();
+  final _bodyController = TextEditingController();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _bodyController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1415,7 +1429,7 @@ class _DealNewNoteSheet extends StatelessWidget {
             padding:
                 const EdgeInsets.only(right: 16, top: 10, bottom: 10),
             child: ElevatedButton(
-              onPressed: () => controller.saveNote(_titleController.text, _bodyController.text),
+              onPressed: () => widget.controller.saveNote(_titleController.text, _bodyController.text),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 minimumSize: Size.zero,
@@ -1544,7 +1558,7 @@ class _DealNewNoteSheet extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => controller.saveNote(_titleController.text, _bodyController.text),
+                onPressed: () => widget.controller.saveNote(_titleController.text, _bodyController.text),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   shape: RoundedRectangleBorder(
@@ -1579,13 +1593,18 @@ extension _DealDetailsViewStateCommunication on _DealDetailsViewState {
               await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (_) => LogCallModal(
-                  initialEntityType: 'deal',
-                  initialEntityId: controller.deal.value.id,
-                  initialEntityName: controller.deal.value.dealName,
+                backgroundColor: AppColors.background,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                builder: (_) => ActivityActionBottomSheet(
+                  actionType: 'call',
+                  entityType: 'deal',
+                  entityId: controller.deal.value.id,
+                  entityName: controller.deal.value.dealName,
+                  onActivityLogged: () => controller.fetchActivities(),
                 ),
               );
-              controller.fetchActivities();
             },
           ),
           _actionButton(
@@ -1595,12 +1614,18 @@ extension _DealDetailsViewStateCommunication on _DealDetailsViewState {
               await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (_) => SendSMSModal(
-                  initialEntityType: 'deal',
-                  initialEntityId: controller.deal.value.id,
+                backgroundColor: AppColors.background,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                builder: (_) => ActivityActionBottomSheet(
+                  actionType: 'sms',
+                  entityType: 'deal',
+                  entityId: controller.deal.value.id,
+                  entityName: controller.deal.value.dealName,
+                  onActivityLogged: () => controller.fetchActivities(),
                 ),
               );
-              controller.fetchActivities();
             },
           ),
           _actionButton(
@@ -1610,12 +1635,18 @@ extension _DealDetailsViewStateCommunication on _DealDetailsViewState {
               await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (_) => SendEmailModal(
-                  initialEntityType: 'deal',
-                  initialEntityId: controller.deal.value.id,
+                backgroundColor: AppColors.background,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                builder: (_) => ActivityActionBottomSheet(
+                  actionType: 'email',
+                  entityType: 'deal',
+                  entityId: controller.deal.value.id,
+                  entityName: controller.deal.value.dealName,
+                  onActivityLogged: () => controller.fetchActivities(),
                 ),
               );
-              controller.fetchActivities();
             },
           ),
           _actionButton(

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../models/crm_models.dart';
 import '../../Services/crm_service.dart';
 import '../../Services/lookups_service.dart';
+import '../../utils/snackbar_helpers.dart';
 import 'package:file_picker/file_picker.dart';
 
 class DealDetailsController extends GetxController
@@ -172,6 +173,8 @@ class DealDetailsController extends GetxController
   }
 
   Future<void> saveNote(String title, String content) async {
+    Get.back();
+    showSaving('Saving note...');
     try {
       await _crmService.createNote({
         'title': title,
@@ -181,16 +184,9 @@ class DealDetailsController extends GetxController
         'linkedEntityId': deal.value.id,
       });
       fetchNotes();
-      Get.back();
-      Get.snackbar('Success', 'Note saved successfully', 
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white);
+      showSaved('Note saved successfully');
     } catch (e) {
-      Get.snackbar('Error', 'Failed to save note: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white);
+      showSaveError('Failed to save note: $e');
     }
   }
 

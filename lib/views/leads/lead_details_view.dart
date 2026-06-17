@@ -10,6 +10,7 @@ import '../../models/crm_models.dart';
 import '../../views/activities/modals/log_call_modal.dart';
 import '../../views/activities/modals/send_email_modal.dart';
 import '../../views/activities/modals/send_sms_modal.dart';
+import '../../widgets/activity_action_bottom_sheet.dart';
 
 class LeadDetailsView extends StatefulWidget {
   const LeadDetailsView({super.key});
@@ -68,7 +69,7 @@ class _LeadDetailsViewState extends State<LeadDetailsView>
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.95,
+        height: MediaQuery.of(context).size.height * 0.8,
         child: _NewNoteSheet(controller),
       ),
     );
@@ -216,13 +217,19 @@ class _LeadDetailsViewState extends State<LeadDetailsView>
               await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (_) => LogCallModal(
-                  initialEntityType: 'lead',
-                  initialEntityId: controller.lead.id,
-                  initialEntityName: controller.lead.name,
+                backgroundColor: AppColors.background,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                builder: (_) => ActivityActionBottomSheet(
+                  actionType: 'call',
+                  entityType: 'lead',
+                  entityId: controller.lead.id,
+                  entityName: controller.lead.name,
+                  phone: controller.lead.phone,
+                  onActivityLogged: () => controller.fetchActivities(),
                 ),
               );
-              controller.fetchActivities();
             },
           ),
           _actionButton(
@@ -232,13 +239,19 @@ class _LeadDetailsViewState extends State<LeadDetailsView>
               await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (_) => SendSMSModal(
-                  initialEntityType: 'lead',
-                  initialEntityId: controller.lead.id,
-                  initialPhone: controller.lead.phone,
+                backgroundColor: AppColors.background,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                builder: (_) => ActivityActionBottomSheet(
+                  actionType: 'sms',
+                  entityType: 'lead',
+                  entityId: controller.lead.id,
+                  entityName: controller.lead.name,
+                  phone: controller.lead.phone,
+                  onActivityLogged: () => controller.fetchActivities(),
                 ),
               );
-              controller.fetchActivities();
             },
           ),
           _actionButton(
@@ -248,13 +261,19 @@ class _LeadDetailsViewState extends State<LeadDetailsView>
               await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (_) => SendEmailModal(
-                  initialEntityType: 'lead',
-                  initialEntityId: controller.lead.id,
-                  initialEmail: controller.lead.email,
+                backgroundColor: AppColors.background,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                builder: (_) => ActivityActionBottomSheet(
+                  actionType: 'email',
+                  entityType: 'lead',
+                  entityId: controller.lead.id,
+                  entityName: controller.lead.name,
+                  email: controller.lead.email,
+                  onActivityLogged: () => controller.fetchActivities(),
                 ),
               );
-              controller.fetchActivities();
             },
           ),
           _actionButton(
@@ -1214,12 +1233,25 @@ class _LeadDetailsViewState extends State<LeadDetailsView>
 // ═══════════════════════════════════════════════════════════════════════
 // NEW NOTE BOTTOM-SHEET (shared between Lead & Deal)
 // ═══════════════════════════════════════════════════════════════════════
-class _NewNoteSheet extends StatelessWidget {
-  final _titleController = TextEditingController();
-  final _bodyController = TextEditingController();
+class _NewNoteSheet extends StatefulWidget {
   final LeadDetailsController controller;
 
-  _NewNoteSheet(this.controller);
+  const _NewNoteSheet(this.controller);
+
+  @override
+  State<_NewNoteSheet> createState() => _NewNoteSheetState();
+}
+
+class _NewNoteSheetState extends State<_NewNoteSheet> {
+  final _titleController = TextEditingController();
+  final _bodyController = TextEditingController();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _bodyController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1241,7 +1273,7 @@ class _NewNoteSheet extends StatelessWidget {
             padding:
                 const EdgeInsets.only(right: 16, top: 10, bottom: 10),
             child: ElevatedButton(
-              onPressed: () => controller.saveNote(_titleController.text, _bodyController.text),
+              onPressed: () => widget.controller.saveNote(_titleController.text, _bodyController.text),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 minimumSize: Size.zero,
@@ -1376,7 +1408,7 @@ class _NewNoteSheet extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => controller.saveNote(_titleController.text, _bodyController.text),
+                onPressed: () => widget.controller.saveNote(_titleController.text, _bodyController.text),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   shape: RoundedRectangleBorder(

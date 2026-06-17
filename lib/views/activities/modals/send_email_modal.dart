@@ -1,51 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../controllers/communication_controller.dart';
 import '../../../utils/app_colors.dart';
 import '../../../models/lead_model.dart';
 import '../../../models/crm_models.dart';
 
-class SendEmailModal extends StatelessWidget {
+class SendEmailModal extends StatefulWidget {
   final String? initialEntityType;
   final int? initialEntityId;
   final String? initialEmail;
+  final bool sendAfterLog;
 
   const SendEmailModal({
     super.key,
     this.initialEntityType,
     this.initialEntityId,
     this.initialEmail,
+    this.sendAfterLog = false,
   });
 
   @override
+  State<SendEmailModal> createState() => _SendEmailModalState();
+}
+
+class _SendEmailModalState extends State<SendEmailModal> {
+  @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.email, color: AppColors.primary, size: 28),
-              const SizedBox(width: 12),
-              const Text('Send Email', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              const Spacer(),
-              IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close)),
-            ],
-          ),
-          const SizedBox(height: 24),
-          SendEmailForm(
-            initialEntityType: initialEntityType,
-            initialEntityId: initialEntityId,
-            initialEmail: initialEmail,
-            onSuccess: () => Get.back(result: true),
-          ),
-        ],
+      padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottomInset),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.email, color: AppColors.primary, size: 28),
+                const SizedBox(width: 12),
+                Text(widget.sendAfterLog ? 'Log & Send Email' : 'Log Email', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const Spacer(),
+                IconButton(onPressed: () => Navigator.of(context, rootNavigator: true).pop(), icon: const Icon(Icons.close)),
+              ],
+            ),
+            const SizedBox(height: 24),
+            SendEmailForm(
+              initialEntityType: widget.initialEntityType,
+              initialEntityId: widget.initialEntityId,
+              initialEmail: widget.initialEmail,
+              sendAfterLog: widget.sendAfterLog,
+              onSuccess: null,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -55,6 +67,7 @@ class SendEmailForm extends StatefulWidget {
   final String? initialEntityType;
   final int? initialEntityId;
   final String? initialEmail;
+  final bool sendAfterLog;
   final VoidCallback? onSuccess;
 
   const SendEmailForm({
@@ -62,6 +75,7 @@ class SendEmailForm extends StatefulWidget {
     this.initialEntityType,
     this.initialEntityId,
     this.initialEmail,
+    this.sendAfterLog = false,
     this.onSuccess,
   });
 
@@ -90,7 +104,7 @@ class _SendEmailFormState extends State<SendEmailForm> {
     toController.text = widget.initialEmail ?? '';
   }
 
-  void _handleSubmit() async {
+  Future<void> _handleSubmit() async {
     if (selectedId == null) {
       Get.snackbar('Error', 'Please select a linked entity');
       return;
@@ -130,8 +144,29 @@ class _SendEmailFormState extends State<SendEmailForm> {
     };
 
     final success = await controller.submitActivity(data);
-    if (success && widget.onSuccess != null) {
-      widget.onSuccess!();
+    if (success) {
+      if (widget.sendAfterLog) {
+        final to = toController.text;
+        final subject = subjectController.text;
+        final body = bodyController.text;
+        if (to.isNotEmpty) {
+          try {
+            await launchUrl(
+              Uri(
+                scheme: 'mailto',
+                path: to,
+                queryParameters: {
+                  if (subject.isNotEmpty) 'subject': subject,
+                  if (body.isNotEmpty) 'body': body,
+                },
+              ),
+              mode: LaunchMode.externalApplication,
+            );
+          } catch (_) {}
+        }
+      }
+      if (widget.onSuccess != null) widget.onSuccess!();
+      if (mounted) Navigator.of(context, rootNavigator: true).pop(true);
     }
   }
 
@@ -148,7 +183,7 @@ class _SendEmailFormState extends State<SendEmailForm> {
           children: [
             // Linked Entity Selection
             if (widget.initialEntityId == null) ...[
-              const Text('Linked To', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primary)),
+              const Text('Linked To', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: AppColors.primary)),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -221,12 +256,12 @@ class _SendEmailFormState extends State<SendEmailForm> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.send, color: Colors.white, size: 18),
-                    SizedBox(width: 12),
-                    Text('Send Email', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    const Icon(Icons.send, color: Colors.white, size: 18),
+                    const SizedBox(width: 12),
+                    Text(widget.sendAfterLog ? 'Log & Send Email' : 'Log Email', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),

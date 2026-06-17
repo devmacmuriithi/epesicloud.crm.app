@@ -6,7 +6,7 @@ import 'api_service.dart';
 
 class CrmService extends GetxService {
   final ApiService _apiService = Get.find<ApiService>();
-  static const String baseUrl = 'http://192.168.1.76:3000';
+  static const String baseUrl = 'https://crmepesicloudcom-production.up.railway.app';
 
   Future<DashboardStats> getDashboardStats() async {
     final response = await _apiService.get(baseUrl, '/api/dashboard/stats');
@@ -250,5 +250,17 @@ class CrmService extends GetxService {
   Future<List<Map<String, dynamic>>> getAgents() async {
     final response = await _apiService.get(baseUrl, '/api/lookups/agents');
     return List<Map<String, dynamic>>.from(jsonDecode(response));
+  }
+
+  Future<List<LookupModel>> getCompetitors() async {
+    final response = await _apiService.get(baseUrl, '/api/lookups/competitors');
+    List<dynamic> data = jsonDecode(response);
+    return data.map((item) => LookupModel.fromJson(item)).toList();
+  }
+
+  Future<List<LookupModel>> getComplaintTypes() async {
+    final response = await _apiService.get(baseUrl, '/api/lookups/complaint-types');
+    List<dynamic> data = jsonDecode(response);
+    return data.map((item) => LookupModel.fromJson(item)).toList();
   }
 }

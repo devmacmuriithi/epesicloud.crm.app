@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = 'http://192.168.1.76:3000'; // Local backend
+  static const String baseUrl = 'https://crmepesicloudcom-production.up.railway.app';
   
   // Auth endpoints
   static const String login = '/api/agent-auth/login';

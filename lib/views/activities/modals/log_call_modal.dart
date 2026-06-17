@@ -6,7 +6,7 @@ import '../../../utils/app_colors.dart';
 import '../../../models/lead_model.dart';
 import '../../../models/crm_models.dart';
 
-class LogCallModal extends StatelessWidget {
+class LogCallModal extends StatefulWidget {
   final String? initialEntityType;
   final int? initialEntityId;
   final String? initialEntityName;
@@ -19,33 +19,41 @@ class LogCallModal extends StatelessWidget {
   });
 
   @override
+  State<LogCallModal> createState() => _LogCallModalState();
+}
+
+class _LogCallModalState extends State<LogCallModal> {
+  @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.phone, color: AppColors.success, size: 28),
-              const SizedBox(width: 12),
-              const Text('Log Call', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              const Spacer(),
-              IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close)),
-            ],
-          ),
-          const SizedBox(height: 24),
-          LogCallForm(
-            initialEntityType: initialEntityType,
-            initialEntityId: initialEntityId,
-            initialEntityName: initialEntityName,
-            onSuccess: () => Get.back(result: true),
-          ),
-        ],
+      padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottomInset),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.phone, color: AppColors.success, size: 28),
+                const SizedBox(width: 12),
+                const Text('Log Call', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const Spacer(),
+                IconButton(onPressed: () => Navigator.of(context, rootNavigator: true).pop(), icon: const Icon(Icons.close)),
+              ],
+            ),
+            const SizedBox(height: 24),
+            LogCallForm(
+              initialEntityType: widget.initialEntityType,
+              initialEntityId: widget.initialEntityId,
+              initialEntityName: widget.initialEntityName,
+              onSuccess: null,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -86,7 +94,7 @@ class _LogCallFormState extends State<LogCallForm> {
     selectedId = widget.initialEntityId;
   }
 
-  void _handleSubmit() async {
+  Future<void> _handleSubmit() async {
     if (selectedId == null) {
       Get.snackbar('Error', 'Please select a linked entity');
       return;
@@ -115,8 +123,9 @@ class _LogCallFormState extends State<LogCallForm> {
     };
 
     final success = await controller.submitActivity(data);
-    if (success && widget.onSuccess != null) {
-      widget.onSuccess!();
+    if (success) {
+      if (widget.onSuccess != null) widget.onSuccess!();
+      if (mounted) Navigator.of(context, rootNavigator: true).pop(true);
     }
   }
 

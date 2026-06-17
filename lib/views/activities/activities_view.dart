@@ -8,6 +8,7 @@ import '../../views/activities/modals/send_email_modal.dart';
 import '../../views/activities/modals/send_sms_modal.dart';
 import '../../views/activities/modals/note_modal.dart';
 import '../../views/activities/modals/document_modal.dart';
+import '../../widgets/activity_action_bottom_sheet.dart';
 
 class ActivitiesView extends StatelessWidget {
   const ActivitiesView({super.key});
@@ -191,11 +192,41 @@ class ActivitiesView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               const SizedBox(width: 20),
-              _buildActionItem(Icons.phone_outlined, 'Call', onTap: () => Get.bottomSheet(const LogCallModal(), isScrollControlled: true)),
+              _buildActionItem(Icons.phone_outlined, 'Call', onTap: () => showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: AppColors.background,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                builder: (_) => const ActivityActionBottomSheet(
+                  actionType: 'call',
+                ),
+              )),
               const SizedBox(width: 20),
-              _buildActionItem(Icons.message_outlined, 'SMS', onTap: () => Get.bottomSheet(const SendSMSModal(), isScrollControlled: true)),
+              _buildActionItem(Icons.message_outlined, 'SMS', onTap: () => showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: AppColors.background,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                builder: (_) => const ActivityActionBottomSheet(
+                  actionType: 'sms',
+                ),
+              )),
               const SizedBox(width: 20),
-              _buildActionItem(Icons.email_outlined, 'Email', onTap: () => Get.bottomSheet(const SendEmailModal(), isScrollControlled: true)),
+              _buildActionItem(Icons.email_outlined, 'Email', onTap: () => showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: AppColors.background,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                builder: (_) => const ActivityActionBottomSheet(
+                  actionType: 'email',
+                ),
+              )),
               const SizedBox(width: 20),
               _buildActionItem(Icons.note_add_outlined, 'Note', onTap: () => Get.bottomSheet(const NoteModal(), isScrollControlled: true)),
               const SizedBox(width: 20),

@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 import '../Services/auth_service.dart';
 
 class LoginController extends GetxController {
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
   final AuthService _authService = Get.find<AuthService>();
   
   var isPasswordVisible = false.obs;
@@ -14,14 +12,11 @@ class LoginController extends GetxController {
     isPasswordVisible.value = !isPasswordVisible.value;
   }
 
-  Future<void> login() async {
-    if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
+  Future<void> login(String email, String password) async {
+    if (email.isNotEmpty && password.isNotEmpty) {
       isLoading.value = true;
       try {
-        final success = await _authService.login(
-          emailController.text.trim(),
-          passwordController.text,
-        );
+        final success = await _authService.login(email.trim(), password);
         
         if (success) {
           Get.offNamed('/main');
@@ -50,12 +45,5 @@ class LoginController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
     }
-  }
-
-  @override
-  void onClose() {
-    emailController.dispose();
-    passwordController.dispose();
-    super.onClose();
   }
 }

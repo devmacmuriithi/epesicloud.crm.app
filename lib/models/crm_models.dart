@@ -624,7 +624,13 @@ class ProductModel {
       productName: json['productName'] ?? '',
       description: json['description'],
       cost: json['cost'] != null ? double.tryParse(json['cost'].toString()) : null,
-      price: json['price'] != null ? double.tryParse(json['price'].toString()) : null,
+      price: json['price'] != null 
+          ? double.tryParse(json['price'].toString()) 
+          : json['unitPrice'] != null 
+              ? double.tryParse(json['unitPrice'].toString()) 
+              : json['sellingPrice'] != null 
+                  ? double.tryParse(json['sellingPrice'].toString()) 
+                  : null,
       productTypeId: json['productTypeId'],
       productCategoryId: json['productCategoryId'],
       condition: json['condition'],

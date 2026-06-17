@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import '../models/crm_models.dart';
 import '../models/lead_model.dart';
 import '../Services/crm_service.dart';
+import '../utils/snackbar_helpers.dart';
 import 'activities_controller.dart';
 
 class CommunicationController extends GetxController {
@@ -52,7 +53,7 @@ class CommunicationController extends GetxController {
   }
 
   Future<bool> submitActivity(Map<String, dynamic> data) async {
-    isLoading.value = true;
+    showSaving('Logging activity...');
     try {
       // Find "Completed" status ID if not provided
       if (data['activityStatusTypeId'] == null) {
@@ -76,44 +77,38 @@ class CommunicationController extends GetxController {
         Get.find<ActivitiesController>().fetchActivities();
       }
       
-      Get.snackbar('Success', 'Activity logged successfully');
+      showSaved('Activity logged successfully');
       return true;
     } catch (e) {
-      Get.snackbar('Error', 'Failed to log activity: $e');
+      showSaveError('Failed to log activity: $e');
       return false;
-    } finally {
-      isLoading.value = false;
     }
   }
 
   Future<bool> submitNote(Map<String, dynamic> data) async {
-    isLoading.value = true;
+    showSaving('Saving note...');
     try {
       await _crmService.createNote(data);
-      Get.snackbar('Success', 'Note added successfully');
+      showSaved('Note saved successfully');
       return true;
     } catch (e) {
-      Get.snackbar('Error', 'Failed to add note: $e');
+      showSaveError('Failed to save note: $e');
       return false;
-    } finally {
-      isLoading.value = false;
     }
   }
 
   Future<bool> submitDocument(Map<String, dynamic> data) async {
-    isLoading.value = true;
+    showSaving('Uploading document...');
     try {
       if (data['fileUrl'] == null) {
         data['fileUrl'] = 'https://example.com/uploads/${data['fileName']}';
       }
       await _crmService.createDocument(data);
-      Get.snackbar('Success', 'Document uploaded successfully');
+      showSaved('Document uploaded successfully');
       return true;
     } catch (e) {
-      Get.snackbar('Error', 'Failed to upload document: $e');
+      showSaveError('Failed to upload document: $e');
       return false;
-    } finally {
-      isLoading.value = false;
     }
   }
 }

@@ -90,7 +90,7 @@ class _DocumentFormState extends State<DocumentForm> {
     Get.snackbar('Success', 'File selected via in-built explorer (Simulated)');
   }
 
-  void _handleSubmit() async {
+  void _handleSubmit() {
     if (selectedId == null) {
       Get.snackbar('Error', 'Please select a linked entity');
       return;
@@ -114,10 +114,8 @@ class _DocumentFormState extends State<DocumentForm> {
       if (selectedType == 'deal') 'dealId': selectedId,
     };
 
-    final success = await controller.submitDocument(data);
-    if (success && widget.onSuccess != null) {
-      widget.onSuccess!();
-    }
+    if (widget.onSuccess != null) widget.onSuccess!();
+    controller.submitDocument(data);
   }
 
   @override

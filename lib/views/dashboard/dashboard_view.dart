@@ -31,9 +31,41 @@ class DashboardView extends StatelessWidget {
                       const SizedBox(height: 24),
                       _buildStatsGrid(controller),
                       const SizedBox(height: 32),
-                      _buildRecentActivityHeader(controller),
+                      _buildTabsHeader(controller),
                       const SizedBox(height: 16),
-                      _buildActivityList(controller),
+                      Obx(() {
+                        if (controller.selectedActivityTab.value == 0) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildSectionHeader(
+                                title: 'Recent Activities',
+                                onViewAll: () {
+                                  final nav = Get.find<AppNavigatorController>();
+                                  nav.changeTabIndex(3);
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              _buildActivityList(controller),
+                            ],
+                          );
+                        } else {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildSectionHeader(
+                                title: 'Recent Visits',
+                                onViewAll: () {
+                                  final nav = Get.find<AppNavigatorController>();
+                                  nav.goToSalesTab(1); // 1 is Visits tab in SalesModuleView
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              _buildVisitsList(controller),
+                            ],
+                          );
+                        }
+                      }),
                       const SizedBox(height: 20),
                     ],
                   ),
@@ -210,35 +242,11 @@ class DashboardView extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildStatCard(
-                  icon: Icons.account_balance_wallet_outlined,
-                  label: 'PIPELINE VALUE',
-                  value: controller.pipelineValue.value,
-                  trend: '+12%',
-                  iconColor: AppColors.success,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildStatCard(
                   icon: Icons.handshake_outlined,
                   label: 'ACTIVE DEALS',
                   value: controller.activeDeals.value.toString(),
                   trend: '+4',
                   iconColor: AppColors.accent,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatCard(
-                  icon: Icons.bar_chart_rounded,
-                  label: 'WIN RATE',
-                  value: controller.winRate.value,
-                  trend: '+2%',
-                  iconColor: AppColors.success,
                 ),
               ),
               const SizedBox(width: 16),
@@ -262,28 +270,6 @@ class DashboardView extends StatelessWidget {
                   label: 'TOTAL ACCOUNTS',
                   value: controller.totalAccounts.value.toString(),
                   iconColor: AppColors.primary,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildStatCard(
-                  icon: Icons.people_alt_outlined,
-                  label: 'TOTAL CONTACTS',
-                  value: controller.totalContacts.value.toString(),
-                  iconColor: AppColors.accent,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatCard(
-                  icon: Icons.history,
-                  label: 'ACTIVITIES THIS WEEK',
-                  value: controller.activitiesThisWeek.value.toString(),
-                  iconColor: AppColors.warning,
                 ),
               ),
               const SizedBox(width: 16),
@@ -388,24 +374,77 @@ class DashboardView extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentActivityHeader(DashboardController controller) {
+  Widget _buildTabsHeader(DashboardController controller) {
+    return Obx(() => SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => controller.selectedActivityTab.value = 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: controller.selectedActivityTab.value == 0 ? AppColors.primary : Colors.transparent,
+                    width: 2,
+                  ),
+                ),
+              ),
+              child: Text(
+                'Recent Activities',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: controller.selectedActivityTab.value == 0 ? FontWeight.bold : FontWeight.normal,
+                  color: controller.selectedActivityTab.value == 0 ? null : AppColors.textSecondary,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () => controller.selectedActivityTab.value = 1,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: controller.selectedActivityTab.value == 1 ? AppColors.primary : Colors.transparent,
+                    width: 2,
+                  ),
+                ),
+              ),
+              child: Text(
+                'Recent Visits',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: controller.selectedActivityTab.value == 1 ? FontWeight.bold : FontWeight.normal,
+                  color: controller.selectedActivityTab.value == 1 ? null : AppColors.textSecondary,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ));
+  }
+
+  Widget _buildSectionHeader({required String title, VoidCallback? onViewAll}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          'Recent Activity',
-          style: TextStyle(
+        Text(
+          title,
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
-        TextButton(
-          onPressed: () {
-            final nav = Get.find<AppNavigatorController>();
-            nav.changeTabIndex(3); // Switch to Activities tab
-          },
-          child: const Text('View All', style: TextStyle(color: AppColors.success)),
-        ),
+        if (onViewAll != null)
+          TextButton(
+            onPressed: onViewAll,
+            child: const Text('View All', style: TextStyle(color: AppColors.success)),
+          ),
       ],
     );
   }
@@ -522,6 +561,109 @@ class DashboardView extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: AppColors.textSecondary.withOpacity(0.5),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVisitsList(DashboardController controller) {
+    if (controller.recentVisits.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 32),
+          child: Column(
+            children: [
+              Icon(Icons.location_on_outlined, size: 48, color: AppColors.textSecondary.withValues(alpha: 0.2)),
+              const SizedBox(height: 12),
+              Text('No recent visits', style: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.5))),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: controller.recentVisits.map((v) {
+        return _buildVisitItem(
+          accountName: v.accountName,
+          status: v.visitStatus,
+          time: v.checkInAt.isNotEmpty ? v.checkInAt : (v.createdAt?.toString() ?? 'Recent'),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildVisitItem({
+    required String accountName,
+    required String status,
+    required String time,
+  }) {
+    Color statusColor = AppColors.primary;
+    if (status.toLowerCase().contains('completed')) {
+      statusColor = AppColors.success;
+    } else if (status.toLowerCase().contains('active')) {
+      statusColor = const Color(0xFF3B82F6); // blue
+    } else {
+      statusColor = AppColors.warning;
+    }
+
+    return InkWell(
+      onTap: () {}, // Optional routing
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.storefront_outlined,
+                color: statusColor,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    accountName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    status.toUpperCase(),
+                    style: TextStyle(
+                      color: statusColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              time,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textSecondary.withOpacity(0.5),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

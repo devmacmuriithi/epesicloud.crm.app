@@ -4,13 +4,39 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../controllers/login_controller.dart';
 import '../../utils/app_colors.dart';
 
-class LoginView extends StatelessWidget {
+class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(LoginController());
+  State<LoginView> createState() => _LoginViewState();
+}
 
+class _LoginViewState extends State<LoginView> {
+  late final LoginController controller;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (Get.isRegistered<LoginController>()) {
+      Get.find<LoginController>().isLoading.value = false;
+      Get.find<LoginController>().isPasswordVisible.value = false;
+      controller = Get.find<LoginController>();
+    } else {
+      controller = Get.put(LoginController(), permanent: false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -60,7 +86,7 @@ class LoginView extends StatelessWidget {
               _buildLabel('Email'),
               const SizedBox(height: 8),
               TextField(
-                controller: controller.emailController,
+                controller: _emailController,
                 decoration: InputDecoration(
                   hintText: 'name@company.com',
                   prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textSecondary),
@@ -72,7 +98,7 @@ class LoginView extends StatelessWidget {
               _buildLabel('Password'),
               const SizedBox(height: 8),
               Obx(() => TextField(
-                controller: controller.passwordController,
+                controller: _passwordController,
                 obscureText: !controller.isPasswordVisible.value,
                 decoration: InputDecoration(
                   hintText: '••••••••',
@@ -108,7 +134,7 @@ class LoginView extends StatelessWidget {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: controller.isLoading.value ? null : controller.login,
+                  onPressed: controller.isLoading.value ? null : () => controller.login(_emailController.text, _passwordController.text),
                   child: controller.isLoading.value 
                     ? const SizedBox(
                         height: 24,

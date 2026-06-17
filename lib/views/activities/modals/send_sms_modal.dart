@@ -1,51 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../controllers/communication_controller.dart';
 import '../../../utils/app_colors.dart';
 import '../../../models/lead_model.dart';
 import '../../../models/crm_models.dart';
 
-class SendSMSModal extends StatelessWidget {
+class SendSMSModal extends StatefulWidget {
   final String? initialEntityType;
   final int? initialEntityId;
   final String? initialPhone;
+  final bool sendAfterLog;
 
   const SendSMSModal({
     super.key,
     this.initialEntityType,
     this.initialEntityId,
     this.initialPhone,
+    this.sendAfterLog = false,
   });
 
   @override
+  State<SendSMSModal> createState() => _SendSMSModalState();
+}
+
+class _SendSMSModalState extends State<SendSMSModal> {
+  @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.message, color: Colors.orange, size: 28),
-              const SizedBox(width: 12),
-              const Text('Send SMS', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              const Spacer(),
-              IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close)),
-            ],
-          ),
-          const SizedBox(height: 24),
-          SendSMSForm(
-            initialEntityType: initialEntityType,
-            initialEntityId: initialEntityId,
-            initialPhone: initialPhone,
-            onSuccess: () => Get.back(result: true),
-          ),
-        ],
+      padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottomInset),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.message, color: Colors.orange, size: 28),
+                const SizedBox(width: 12),
+                Text(widget.sendAfterLog ? 'Log & Send SMS' : 'Log SMS', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const Spacer(),
+                IconButton(onPressed: () => Navigator.of(context, rootNavigator: true).pop(), icon: const Icon(Icons.close)),
+              ],
+            ),
+            const SizedBox(height: 24),
+            SendSMSForm(
+              initialEntityType: widget.initialEntityType,
+              initialEntityId: widget.initialEntityId,
+              initialPhone: widget.initialPhone,
+              sendAfterLog: widget.sendAfterLog,
+              onSuccess: null,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -55,6 +67,7 @@ class SendSMSForm extends StatefulWidget {
   final String? initialEntityType;
   final int? initialEntityId;
   final String? initialPhone;
+  final bool sendAfterLog;
   final VoidCallback? onSuccess;
 
   const SendSMSForm({
@@ -62,6 +75,7 @@ class SendSMSForm extends StatefulWidget {
     this.initialEntityType,
     this.initialEntityId,
     this.initialPhone,
+    this.sendAfterLog = false,
     this.onSuccess,
   });
 
@@ -90,7 +104,7 @@ class _SendSMSFormState extends State<SendSMSForm> {
     });
   }
 
-  void _handleSubmit() async {
+  Future<void> _handleSubmit() async {
     if (selectedId == null) {
       Get.snackbar('Error', 'Please select a linked entity');
       return;
@@ -114,7 +128,6 @@ class _SendSMSFormState extends State<SendSMSForm> {
       'startDate': DateFormat('yyyy-MM-dd').format(now),
       'startDateTime': now.toIso8601String(),
       'endDateTime': now.add(const Duration(minutes: 1)).toIso8601String(),
-      // Map to explicit backend fields
       if (selectedType == 'lead') 'leadId': selectedId,
       if (selectedType == 'account') 'accountId': selectedId,
       if (selectedType == 'contact') 'contactId': selectedId,
@@ -122,8 +135,22 @@ class _SendSMSFormState extends State<SendSMSForm> {
     };
 
     final success = await controller.submitActivity(data);
-    if (success && widget.onSuccess != null) {
-      widget.onSuccess!();
+    if (success) {
+      if (widget.sendAfterLog) {
+        final targetPhone = widget.initialPhone;
+        final message = messageController.text;
+        if (targetPhone != null && targetPhone.isNotEmpty) {
+          final clean = targetPhone.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+          try {
+            await launchUrl(
+              Uri(scheme: 'sms', path: clean, queryParameters: {'body': message}),
+              mode: LaunchMode.externalApplication,
+            );
+          } catch (_) {}
+        }
+      }
+      if (widget.onSuccess != null) widget.onSuccess!();
+      if (mounted) Navigator.of(context, rootNavigator: true).pop(true);
     }
   }
 
@@ -175,6 +202,20 @@ class _SendSMSFormState extends State<SendSMSForm> {
             ],
 
 
+            // Phone display
+            if (widget.initialPhone != null && widget.initialPhone!.isNotEmpty) ...[              Row(
+                children: [
+                  const Icon(Icons.phone_outlined, size: 14, color: AppColors.textSecondary),
+                  const SizedBox(width: 6),
+                  Text(
+                    widget.initialPhone!,
+                    style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
+
             // Message
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -206,7 +247,7 @@ class _SendSMSFormState extends State<SendSMSForm> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Send SMS', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: Text(widget.sendAfterLog ? 'Log & Send SMS' : 'Log SMS', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),
             const SizedBox(height: 20),

@@ -4,6 +4,7 @@ class UserModel {
   final String? tenantId;
   final String? firstName;
   final String? lastName;
+  final String? name;
   final String role;
 
   UserModel({
@@ -12,8 +13,17 @@ class UserModel {
     this.tenantId,
     this.firstName,
     this.lastName,
+    this.name,
     required this.role,
   });
+
+  String get displayName {
+    if (name != null && name!.isNotEmpty) return name!;
+    final first = firstName ?? '';
+    final last = lastName ?? '';
+    final full = '$first $last'.trim();
+    return full.isNotEmpty ? full : email.split('@').first;
+  }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
@@ -22,6 +32,7 @@ class UserModel {
       tenantId: json['tenantId'],
       firstName: json['firstName'],
       lastName: json['lastName'],
+      name: json['name'],
       role: json['role'] ?? 'user',
     );
   }
@@ -33,6 +44,7 @@ class UserModel {
       'tenantId': tenantId,
       'firstName': firstName,
       'lastName': lastName,
+      'name': name,
       'role': role,
     };
   }

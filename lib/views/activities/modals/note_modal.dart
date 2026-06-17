@@ -16,31 +16,37 @@ class NoteModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    return Padding(
+      padding: EdgeInsets.only(bottom: keyboardHeight),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.sticky_note_2, color: AppColors.primary, size: 28),
-              const SizedBox(width: 12),
-              const Text('Add Note', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              const Spacer(),
-              IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close)),
+              Row(
+                children: [
+                  const Icon(Icons.sticky_note_2, color: AppColors.primary, size: 28),
+                  const SizedBox(width: 12),
+                  const Text('Add Note', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Spacer(),
+                  IconButton(onPressed: () => Navigator.of(context, rootNavigator: true).pop(), icon: const Icon(Icons.close)),
+                ],
+              ),
+              const SizedBox(height: 24),
+              NoteForm(
+                initialEntityType: initialEntityType,
+                initialEntityId: initialEntityId,
+                onSuccess: null,
+              ),
             ],
           ),
-          const SizedBox(height: 24),
-          NoteForm(
-            initialEntityType: initialEntityType,
-            initialEntityId: initialEntityId,
-            onSuccess: () => Get.back(),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -78,7 +84,7 @@ class _NoteFormState extends State<NoteForm> {
     selectedId = widget.initialEntityId;
   }
 
-  void _handleSubmit() async {
+  Future<void> _handleSubmit() async {
     if (selectedId == null) {
       Get.snackbar('Error', 'Please select a linked entity');
       return;
@@ -100,8 +106,9 @@ class _NoteFormState extends State<NoteForm> {
     };
 
     final success = await controller.submitNote(data);
-    if (success && widget.onSuccess != null) {
-      widget.onSuccess!();
+    if (success) {
+      if (widget.onSuccess != null) widget.onSuccess!();
+      if (mounted) Navigator.of(context, rootNavigator: true).pop(true);
     }
   }
 
@@ -112,10 +119,10 @@ class _NoteFormState extends State<NoteForm> {
         return const Center(child: CircularProgressIndicator(color: AppColors.primary));
       }
 
-      return SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
             // Linked Entity Selection
             if (widget.initialEntityId == null) ...[
               const Text('Linked To', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primary)),
@@ -188,7 +195,6 @@ class _NoteFormState extends State<NoteForm> {
             ),
             const SizedBox(height: 20),
           ],
-        ),
       );
     });
   }

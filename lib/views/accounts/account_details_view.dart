@@ -12,6 +12,7 @@ import '../../controllers/new_activity_controller.dart';
 import '../../controllers/deals_controller.dart';
 import '../../controllers/contacts_controller.dart';
 import '../deals/modals/add_deal_modal.dart';
+import '../../widgets/activity_action_bottom_sheet.dart';
 
 class AccountDetailsView extends StatefulWidget {
   const AccountDetailsView({super.key});
@@ -72,7 +73,7 @@ class _AccountDetailsViewState extends State<AccountDetailsView> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.95,
+        height: MediaQuery.of(context).size.height * 0.8,
         child: Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: _AccountNewNoteSheet(controller),
@@ -1364,13 +1365,19 @@ class _AccountDetailsViewState extends State<AccountDetailsView> {
               await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (_) => LogCallModal(
-                  initialEntityType: 'account',
-                  initialEntityId: controller.account.id,
-                  initialEntityName: controller.account.accountName,
+                backgroundColor: AppColors.background,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                builder: (_) => ActivityActionBottomSheet(
+                  actionType: 'call',
+                  entityType: 'account',
+                  entityId: controller.account.id,
+                  entityName: controller.account.accountName,
+                  phone: controller.account.phone,
+                  onActivityLogged: () => controller.fetchActivities(),
                 ),
               );
-              controller.fetchActivities();
             },
           ),
           _actionButton(
@@ -1380,13 +1387,19 @@ class _AccountDetailsViewState extends State<AccountDetailsView> {
               await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (_) => SendSMSModal(
-                  initialEntityType: 'account',
-                  initialEntityId: controller.account.id,
-                  initialPhone: controller.account.phone,
+                backgroundColor: AppColors.background,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                builder: (_) => ActivityActionBottomSheet(
+                  actionType: 'sms',
+                  entityType: 'account',
+                  entityId: controller.account.id,
+                  entityName: controller.account.accountName,
+                  phone: controller.account.phone,
+                  onActivityLogged: () => controller.fetchActivities(),
                 ),
               );
-              controller.fetchActivities();
             },
           ),
           _actionButton(
@@ -1396,12 +1409,18 @@ class _AccountDetailsViewState extends State<AccountDetailsView> {
               await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (_) => SendEmailModal(
-                  initialEntityType: 'account',
-                  initialEntityId: controller.account.id,
+                backgroundColor: AppColors.background,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                builder: (_) => ActivityActionBottomSheet(
+                  actionType: 'email',
+                  entityType: 'account',
+                  entityId: controller.account.id,
+                  entityName: controller.account.accountName,
+                  onActivityLogged: () => controller.fetchActivities(),
                 ),
               );
-              controller.fetchActivities();
             },
           ),
           _actionButton(
@@ -1467,12 +1486,25 @@ class _AccountDetailsViewState extends State<AccountDetailsView> {
 // ═══════════════════════════════════════════════════════════════════════
 // NEW NOTE BOTTOM-SHEET (Account)
 // ═══════════════════════════════════════════════════════════════════════
-class _AccountNewNoteSheet extends StatelessWidget {
-  final _titleController = TextEditingController();
-  final _bodyController = TextEditingController();
+class _AccountNewNoteSheet extends StatefulWidget {
   final AccountDetailsController controller;
 
-  _AccountNewNoteSheet(this.controller);
+  const _AccountNewNoteSheet(this.controller);
+
+  @override
+  State<_AccountNewNoteSheet> createState() => _AccountNewNoteSheetState();
+}
+
+class _AccountNewNoteSheetState extends State<_AccountNewNoteSheet> {
+  final _titleController = TextEditingController();
+  final _bodyController = TextEditingController();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _bodyController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1492,7 +1524,7 @@ class _AccountNewNoteSheet extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 16, top: 10, bottom: 10),
             child: ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => widget.controller.saveNote(_titleController.text, _bodyController.text),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 minimumSize: Size.zero,
@@ -1594,7 +1626,7 @@ class _AccountNewNoteSheet extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => controller.saveNote(_titleController.text, _bodyController.text),
+                onPressed: () => widget.controller.saveNote(_titleController.text, _bodyController.text),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

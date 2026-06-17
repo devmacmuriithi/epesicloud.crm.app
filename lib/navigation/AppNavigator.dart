@@ -148,6 +148,26 @@ class AppNavigator extends StatelessWidget {
                       Get.toNamed('/products');
                     },
                   ),
+                  _buildBottomSheetDivider(),
+                  _buildBottomSheetItem(
+                    icon: Icons.location_on_outlined,
+                    label: 'Live Agent Map',
+                    color: AppColors.textSecondary,
+                    onTap: () {
+                      Get.back();
+                      Get.toNamed('/live-map');
+                    },
+                  ),
+                  _buildBottomSheetDivider(),
+                  _buildBottomSheetItem(
+                    icon: Icons.store_mall_directory_outlined,
+                    label: 'Accounts Map',
+                    color: AppColors.textSecondary,
+                    onTap: () {
+                      Get.back();
+                      Get.toNamed('/accounts-map');
+                    },
+                  ),
                 ],
               ),
             ),
