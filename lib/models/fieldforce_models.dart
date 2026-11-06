@@ -531,6 +531,8 @@ class VisitRecord {
   final DateTime? createdAt;
   final double? checkInLatitude;
   final double? checkInLongitude;
+  final int? zoneId;
+  final String? zoneName;
 
   // Aggregate Tab Collections
   final List<VisitOrder> orders;
@@ -554,6 +556,8 @@ class VisitRecord {
     this.createdAt,
     this.checkInLatitude,
     this.checkInLongitude,
+    this.zoneId,
+    this.zoneName,
     this.orders = const [],
     this.competitorRates = const [],
     this.outletRates = const [],
@@ -577,6 +581,8 @@ class VisitRecord {
       createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
       checkInLatitude: json['checkInLatitude'] != null ? double.tryParse(json['checkInLatitude'].toString()) : null,
       checkInLongitude: json['checkInLongitude'] != null ? double.tryParse(json['checkInLongitude'].toString()) : null,
+      zoneId: json['zoneId'],
+      zoneName: json['zoneName'],
       orders: (json['orders'] as List?)?.map((x) => VisitOrder.fromJson(x)).toList() ?? [],
       competitorRates: (json['competitorRates'] as List?)?.map((x) => CompetitorRate.fromJson(x)).toList() ?? [],
       outletRates: (json['outletRates'] as List?)?.map((x) => OutletRate.fromJson(x)).toList() ?? [],

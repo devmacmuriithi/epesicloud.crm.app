@@ -27,37 +27,46 @@ class ActivitiesView extends StatelessWidget {
             _buildSearchAndFilters(controller),
             
             Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value && controller.allActivities.isEmpty) {
-                  return const Center(child: CircularProgressIndicator(color: AppColors.primary));
-                }
+              child: RefreshIndicator(
+                onRefresh: () => controller.fetchActivities(),
+                color: AppColors.primary,
+                child: Obx(() {
+                  if (controller.isLoading.value && controller.allActivities.isEmpty) {
+                    return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+                  }
 
-                if (controller.activities.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                  if (controller.activities.isEmpty) {
+                    return ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       children: [
-                        const Icon(Icons.search_off, size: 48, color: AppColors.textSecondary),
-                        const SizedBox(height: 16),
-                        Text('No ${controller.selectedFilter.value == 'All' ? '' : controller.selectedFilter.value.toLowerCase()} activities found', 
-                             style: const TextStyle(color: AppColors.textSecondary, fontSize: 16)),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.5,
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.search_off, size: 48, color: AppColors.textSecondary),
+                                const SizedBox(height: 16),
+                                Text('No ${controller.selectedFilter.value == 'All' ? '' : controller.selectedFilter.value.toLowerCase()} activities found', 
+                                     style: const TextStyle(color: AppColors.textSecondary, fontSize: 16)),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
-                    ),
-                  );
-                }
+                    );
+                  }
 
-                return RefreshIndicator(
-                  onRefresh: () => controller.fetchActivities(),
-                  color: AppColors.primary,
-                  child: ListView.builder(
+                  return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
+                    physics: const AlwaysScrollableScrollPhysics(),
                     itemCount: controller.activities.length,
                     itemBuilder: (context, index) {
                       return _buildActivityCard(controller.activities[index], controller);
                     },
-                  ),
-                );
-              }),
+                  );
+                }),
+              ),
             ),
           ],
         ),
@@ -291,17 +300,21 @@ class ActivitiesView extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    activity.status.toUpperCase(),
-                    style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
-                  ),
-                ),
+                if (activity.status.isNotEmpty &&
+                    activity.status.toLowerCase() != 'unknown')
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      activity.status.toUpperCase(),
+                      style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                  )
+                else
+                  const SizedBox.shrink(),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
@@ -326,42 +339,53 @@ class ActivitiesView extends StatelessWidget {
                 children: [
                   const Icon(Icons.location_on_outlined, size: 14, color: AppColors.textSecondary),
                   const SizedBox(width: 4),
-                  Text(activity.location!, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                  Expanded(
+                    child: Text(
+                      activity.location!,
+                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
                 ],
               ),
             ],
             const SizedBox(height: 16),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    const Icon(Icons.calendar_today_outlined, color: AppColors.textSecondary, size: 14),
-                    const SizedBox(width: 4),
-                    Text(
-                      activity.startDate ?? 'No date',
-                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w500),
-                    ),
-                  ],
+                const Icon(Icons.calendar_today_outlined, color: AppColors.textSecondary, size: 14),
+                const SizedBox(width: 4),
+                Text(
+                  activity.startDate ?? 'No date',
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w500),
                 ),
-                if (activity.linkedEntityName != null) 
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(_getEntityIcon(activity.linkedEntityType), size: 12, color: AppColors.primary),
-                        const SizedBox(width: 4),
-                        Text(
-                          activity.linkedEntityName!,
-                          style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                if (activity.linkedEntityName != null) ...[
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(_getEntityIcon(activity.linkedEntityType), size: 12, color: AppColors.primary),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              activity.linkedEntityName!,
+                              style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.bold),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
+                ],
               ],
             ),
           ],

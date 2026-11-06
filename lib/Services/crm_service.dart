@@ -6,7 +6,7 @@ import 'api_service.dart';
 
 class CrmService extends GetxService {
   final ApiService _apiService = Get.find<ApiService>();
-  static const String baseUrl = 'https://crmepesicloudcom-production.up.railway.app';
+  static const String baseUrl = 'https://crm.epesicloud.com';
 
   Future<DashboardStats> getDashboardStats() async {
     final response = await _apiService.get(baseUrl, '/api/dashboard/stats');

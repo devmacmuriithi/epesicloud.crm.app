@@ -65,8 +65,8 @@ class LeadsView extends StatelessWidget {
               Expanded(
                 child: TabBarView(
                   children: [
-                    _buildLeadsTab(leadsController),
-                    _buildAccountsTab(accountsController),
+                    _buildLeadsTab(context, leadsController),
+                    _buildAccountsTab(context, accountsController),
                   ],
                 ),
               ),
@@ -77,7 +77,7 @@ class LeadsView extends StatelessWidget {
     );
   }
 
-  Widget _buildLeadsTab(LeadsController controller) {
+  Widget _buildLeadsTab(BuildContext context, LeadsController controller) {
     return Column(
       children: [
         Padding(
@@ -89,30 +89,39 @@ class LeadsView extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: Obx(() {
-            if (controller.isLoading.value && controller.leads.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (controller.leads.isEmpty) {
-              return const Center(child: Text('No leads found'));
-            }
-            return RefreshIndicator(
-              onRefresh: () => controller.fetchLeads(),
-              child: ListView.builder(
+          child: RefreshIndicator(
+            onRefresh: () => controller.fetchLeads(),
+            child: Obx(() {
+              if (controller.isLoading.value && controller.leads.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (controller.leads.isEmpty) {
+                return ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.5,
+                      child: const Center(child: Text('No leads found')),
+                    ),
+                  ],
+                );
+              }
+              return ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
+                physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: controller.leads.length,
                 itemBuilder: (context, index) {
                   return _buildLeadCard(controller.leads[index], controller);
                 },
-              ),
-            );
-          }),
+              );
+            }),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildAccountsTab(AccountsController controller) {
+  Widget _buildAccountsTab(BuildContext context, AccountsController controller) {
     return Column(
       children: [
         Padding(
@@ -124,24 +133,33 @@ class LeadsView extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: Obx(() {
-            if (controller.isLoading.value && controller.accounts.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (controller.accounts.isEmpty) {
-              return const Center(child: Text('No accounts found'));
-            }
-            return RefreshIndicator(
-              onRefresh: () => controller.fetchAccounts(),
-              child: ListView.builder(
+          child: RefreshIndicator(
+            onRefresh: () => controller.fetchAccounts(),
+            child: Obx(() {
+              if (controller.isLoading.value && controller.accounts.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (controller.accounts.isEmpty) {
+                return ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.5,
+                      child: const Center(child: Text('No accounts found')),
+                    ),
+                  ],
+                );
+              }
+              return ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
+                physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: controller.accounts.length,
                 itemBuilder: (context, index) {
                   return _buildAccountCard(controller.accounts[index]);
                 },
-              ),
-            );
-          }),
+              );
+            }),
+          ),
         ),
       ],
     );

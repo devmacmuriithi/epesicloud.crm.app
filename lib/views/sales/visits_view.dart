@@ -22,40 +22,57 @@ class VisitsView extends StatelessWidget {
           }
 
           if (controller.hasError.value) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, color: Colors.red, size: 48),
-                  const SizedBox(height: 16),
-                  Text(controller.errorMessage.value,
-                      style: const TextStyle(color: AppColors.textSecondary)),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: controller.fetchVisits,
-                    child: const Text('Retry'),
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                        const SizedBox(height: 16),
+                        Text(controller.errorMessage.value,
+                            style: const TextStyle(color: AppColors.textSecondary)),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: controller.fetchVisits,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           }
 
           if (controller.visits.isEmpty) {
-            return const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.history_outlined, color: Colors.black26, size: 64),
-                  SizedBox(height: 16),
-                  Text('No visits recorded yet',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 16)),
-                ],
-              ),
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  child: const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.history_outlined, color: Colors.black26, size: 64),
+                        SizedBox(height: 16),
+                        Text('No visits recorded yet',
+                            style: TextStyle(color: AppColors.textSecondary, fontSize: 16)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             );
           }
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
+            physics: const AlwaysScrollableScrollPhysics(),
             itemCount: controller.visits.length,
             itemBuilder: (context, index) {
               final visit = controller.visits[index];
@@ -103,7 +120,10 @@ class VisitsView extends StatelessWidget {
                         fontSize: 16,
                         fontWeight: FontWeight.bold)),
               ),
+              const SizedBox(width: 8),
               _buildStatusBadge(visit.visitStatus),
+              const SizedBox(width: 8),
+              const Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 20),
             ],
           ),
           const SizedBox(height: 12),

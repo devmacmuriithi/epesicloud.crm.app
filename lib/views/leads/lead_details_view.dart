@@ -68,8 +68,8 @@ class _LeadDetailsViewState extends State<LeadDetailsView>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.8,
+      builder: (_) => FractionallySizedBox(
+        heightFactor: 0.9,
         child: _NewNoteSheet(controller),
       ),
     );
@@ -1255,177 +1255,210 @@ class _NewNoteSheetState extends State<_NewNoteSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: AppColors.textSecondary),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text('New Note',
-            style:
-                TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        centerTitle: true,
-        actions: [
-          Padding(
-            padding:
-                const EdgeInsets.only(right: 16, top: 10, bottom: 10),
-            child: ElevatedButton(
-              onPressed: () => widget.controller.saveNote(_titleController.text, _bodyController.text),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                minimumSize: Size.zero,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-              ),
-              child: const Text('Save',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold)),
-            ),
+    return Builder(
+      builder: (context) {
+        final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
+
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Title',
-                style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _titleController,
-              style: const TextStyle(fontSize: 14),
-              decoration: InputDecoration(
-                hintText: 'e.g. Follow-up action items',
-                hintStyle: const TextStyle(
-                    color: AppColors.textSecondary, fontSize: 14),
-                filled: true,
-                fillColor: AppColors.background,
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 14),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: AppColors.divider)),
-                enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: AppColors.divider)),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: AppColors.primary)),
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text('Note',
-                style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _bodyController,
-              maxLines: 8,
-              style: const TextStyle(fontSize: 14),
-              decoration: InputDecoration(
-                hintText: 'Write your note here...',
-                hintStyle: const TextStyle(
-                    color: AppColors.textSecondary, fontSize: 14),
-                filled: true,
-                fillColor: AppColors.background,
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 14),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: AppColors.divider)),
-                enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: AppColors.divider)),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: AppColors.primary)),
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Pin toggle
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.push_pin,
-                        color: AppColors.primary, size: 20),
+          padding: EdgeInsets.only(bottom: keyboardInset),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Handle bar
+                Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 4),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.divider,
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  const SizedBox(width: 16),
-                  const Expanded(
+                ),
+                // Header row
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.close, color: AppColors.textSecondary),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                      const Expanded(
+                        child: Text(
+                          'New Note',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 4),
+                        child: ElevatedButton(
+                          onPressed: () => widget.controller.saveNote(
+                            _titleController.text,
+                            _bodyController.text,
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            minimumSize: Size.zero,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          ),
+                          child: const Text('Save',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                // Flexible so the scroll view has a bounded height and can scroll
+                Flexible(
+                  child: SingleChildScrollView(
+                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Pin this note',
+                        const Text('Title',
                             style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14)),
-                        SizedBox(height: 4),
-                        Text(
-                          'Pinned notes appear at the top',
-                          style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 12),
+                                color: AppColors.textPrimary,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _titleController,
+                          style: const TextStyle(fontSize: 14),
+                          decoration: InputDecoration(
+                            hintText: 'e.g. Follow-up action items',
+                            hintStyle: const TextStyle(
+                                color: AppColors.textSecondary, fontSize: 14),
+                            filled: true,
+                            fillColor: AppColors.background,
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 14),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(color: AppColors.divider)),
+                            enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(color: AppColors.divider)),
+                            focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(color: AppColors.primary)),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        const Text('Note',
+                            style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _bodyController,
+                          maxLines: 5,
+                          style: const TextStyle(fontSize: 14),
+                          decoration: InputDecoration(
+                            hintText: 'Write your note here...',
+                            hintStyle: const TextStyle(
+                                color: AppColors.textSecondary, fontSize: 14),
+                            filled: true,
+                            fillColor: AppColors.background,
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 14),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(color: AppColors.divider)),
+                            enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(color: AppColors.divider)),
+                            focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(color: AppColors.primary)),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(Icons.push_pin,
+                                    color: AppColors.primary, size: 20),
+                              ),
+                              const SizedBox(width: 16),
+                              const Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Pin this note',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14)),
+                                    SizedBox(height: 4),
+                                    Text('Pinned notes appear at the top',
+                                        style: TextStyle(
+                                            color: AppColors.textSecondary,
+                                            fontSize: 12)),
+                                  ],
+                                ),
+                              ),
+                              Switch(
+                                value: false,
+                                onChanged: (_) {},
+                                activeColor: AppColors.primary,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () => widget.controller.saveNote(
+                              _titleController.text,
+                              _bodyController.text,
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: const Text('Save Note',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold)),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  Switch(
-                    value: false,
-                    onChanged: (_) {},
-                    activeColor: AppColors.primary,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => widget.controller.saveNote(_titleController.text, _bodyController.text),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: const Text('Save Note',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold)),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

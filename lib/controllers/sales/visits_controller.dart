@@ -100,11 +100,14 @@ class VisitsController extends GetxController {
         agentId: agentId,
       );
       
-      await _service.startVisit(request);
+      final responseMap = await _service.startVisit(request);
       Get.back();
       Get.snackbar('Visit Active', 'Unplanned visit successfully started');
       
       fetchVisits();
+
+      final visitRecord = VisitRecord.fromJson(responseMap);
+      goToVisitDetails(visitRecord);
     } catch (e) {
       Get.back();
       Get.snackbar('Error', e.toString());
@@ -279,11 +282,11 @@ class VisitsController extends GetxController {
   }
 
   Future<void> addVisitOrder(int visitId, Map<String, dynamic> data) async {
-    _showSaving('Saving order...');
+    _showSaving('Saving reservation...');
     try {
       final res = await _service.addVisitOrder(visitId, data);
       workspaceOrders.add(res);
-      _showSaved('Order saved successfully');
+      _showSaved('Reservation saved successfully');
     } catch (e) {
       _showSaveError(e.toString());
     }

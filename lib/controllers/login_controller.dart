@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../Services/app_exceptions.dart';
 import '../Services/auth_service.dart';
 
 class LoginController extends GetxController {
@@ -30,10 +31,18 @@ class LoginController extends GetxController {
           );
         }
       } catch (e) {
+        String errorMessage = 'Invalid email or password';
+        if (e is AppException && e.message != null && e.message!.isNotEmpty) {
+          errorMessage = e.message!;
+        } else if (e is String) {
+          errorMessage = e;
+        }
         Get.snackbar(
-          'Error',
-          'An unexpected error occurred: $e',
+          'Login Failed',
+          errorMessage,
           snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.withOpacity(0.1),
+          colorText: Colors.red,
         );
       } finally {
         isLoading.value = false;

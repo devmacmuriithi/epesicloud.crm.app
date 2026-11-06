@@ -16,38 +16,48 @@ class NoteModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-    return Padding(
-      padding: EdgeInsets.only(bottom: keyboardHeight),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.background,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
+    return Builder(
+      builder: (context) {
+        final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
+        final screenHeight = MediaQuery.of(context).size.height;
+
+        return SafeArea(
+          top: false,
+          child: Container(
+            constraints: BoxConstraints(maxHeight: screenHeight * 0.9),
+            decoration: const BoxDecoration(
+              color: AppColors.background,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            // Pad bottom by keyboard height so content stays above keyboard
+            padding: EdgeInsets.only(bottom: keyboardInset),
+            child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.sticky_note_2, color: AppColors.primary, size: 28),
-                  const SizedBox(width: 12),
-                  const Text('Add Note', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const Spacer(),
-                  IconButton(onPressed: () => Navigator.of(context, rootNavigator: true).pop(), icon: const Icon(Icons.close)),
+                  Row(
+                    children: [
+                      const Icon(Icons.sticky_note_2, color: AppColors.primary, size: 28),
+                      const SizedBox(width: 12),
+                      const Text('Add Note', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      const Spacer(),
+                      IconButton(onPressed: () => Navigator.of(context, rootNavigator: true).pop(), icon: const Icon(Icons.close)),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  NoteForm(
+                    initialEntityType: initialEntityType,
+                    initialEntityId: initialEntityId,
+                    onSuccess: null,
+                  ),
                 ],
               ),
-              const SizedBox(height: 24),
-              NoteForm(
-                initialEntityType: initialEntityType,
-                initialEntityId: initialEntityId,
-                onSuccess: null,
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

@@ -7,6 +7,7 @@ import '../views/leads/leads_view.dart';
 import '../views/sales/sales_module_view.dart';
 import '../views/activities/activities_view.dart';
 import '../views/calendar/calendar_view.dart';
+import '../Services/auth_service.dart';
 
 class AppNavigator extends StatelessWidget {
   const AppNavigator({super.key});
@@ -169,6 +170,33 @@ class AppNavigator extends StatelessWidget {
                     },
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Sign Out button
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  Get.back();
+                  Get.find<AuthService>().logout();
+                },
+                icon: const Icon(Icons.logout, color: AppColors.danger),
+                label: const Text(
+                  'Sign Out',
+                  style: TextStyle(
+                    color: AppColors.danger,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  side: const BorderSide(color: AppColors.danger),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 32),

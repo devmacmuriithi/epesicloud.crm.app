@@ -20,9 +20,11 @@ class _LoginViewState extends State<LoginView> {
   void initState() {
     super.initState();
     if (Get.isRegistered<LoginController>()) {
-      Get.find<LoginController>().isLoading.value = false;
-      Get.find<LoginController>().isPasswordVisible.value = false;
       controller = Get.find<LoginController>();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.isLoading.value = false;
+        controller.isPasswordVisible.value = false;
+      });
     } else {
       controller = Get.put(LoginController(), permanent: false);
     }

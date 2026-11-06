@@ -18,12 +18,13 @@ class VisitDetailsView extends StatefulWidget {
 
 class _VisitDetailsViewState extends State<VisitDetailsView> with SingleTickerProviderStateMixin {
   final VisitsController controller = Get.find<VisitsController>();
+  static const List<int> _visibleTabIndices = [0, 5, 6, 7];
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 8, vsync: this);
+    _tabController = TabController(length: _visibleTabIndices.length, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         setState(() {});
@@ -135,7 +136,7 @@ class _VisitDetailsViewState extends State<VisitDetailsView> with SingleTickerPr
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 8,
+      length: _visibleTabIndices.length,
       child: Scaffold(
         backgroundColor: AppColors.background,
         body: NestedScrollView(
@@ -194,11 +195,11 @@ class _VisitDetailsViewState extends State<VisitDetailsView> with SingleTickerPr
                   labelColor: AppColors.primary,
                   unselectedLabelColor: AppColors.textSecondary,
                   tabs: [
-                    Tab(text: 'Orders'),
-                    Tab(text: 'Competitor Rates'),
-                    Tab(text: 'Outlet Rates'),
-                    Tab(text: 'Stock'),
-                    Tab(text: 'Shelves'),
+                    Tab(text: 'Reservations'),
+                    // Tab(text: 'Competitor Rates'),
+                    // Tab(text: 'Outlet Rates'),
+                    // Tab(text: 'Stock'),
+                    // Tab(text: 'Shelves'),
                     Tab(text: 'Promotions'),
                     Tab(text: 'Complaints'),
                     Tab(text: 'Photos'),
@@ -211,10 +212,10 @@ class _VisitDetailsViewState extends State<VisitDetailsView> with SingleTickerPr
             controller: _tabController,
             children: [
               _OrdersTab(controller: controller, visitId: widget.visit.id, onAdd: () => _showAddSheet(0)),
-              _CompetitorRatesTab(controller: controller, visitId: widget.visit.id, onAdd: () => _showAddSheet(1)),
-              _OutletRatesTab(controller: controller, visitId: widget.visit.id, onAdd: () => _showAddSheet(2)),
-              _StockAvailabilityTab(controller: controller, visitId: widget.visit.id, onAdd: () => _showAddSheet(3)),
-              _ShelfPlacementsTab(controller: controller, visitId: widget.visit.id, onAdd: () => _showAddSheet(4)),
+              // _CompetitorRatesTab(controller: controller, visitId: widget.visit.id, onAdd: () => _showAddSheet(1)),
+              // _OutletRatesTab(controller: controller, visitId: widget.visit.id, onAdd: () => _showAddSheet(2)),
+              // _StockAvailabilityTab(controller: controller, visitId: widget.visit.id, onAdd: () => _showAddSheet(3)),
+              // _ShelfPlacementsTab(controller: controller, visitId: widget.visit.id, onAdd: () => _showAddSheet(4)),
               _PromotionAuditsTab(controller: controller, visitId: widget.visit.id, onAdd: () => _showAddSheet(5)),
               _ComplaintsTab(controller: controller, visitId: widget.visit.id, onAdd: () => _showAddSheet(6)),
               _PhotosTab(controller: controller, visitId: widget.visit.id, onAdd: () => _showAddSheet(7)),
@@ -222,11 +223,12 @@ class _VisitDetailsViewState extends State<VisitDetailsView> with SingleTickerPr
           ),
         ),
         floatingActionButton: Obx(() {
-          final isNotEmpty = _isListNotEmpty(_tabController.index);
+          final actualIndex = _visibleTabIndices[_tabController.index];
+          final isNotEmpty = _isListNotEmpty(actualIndex);
           if (!isNotEmpty) return const SizedBox.shrink();
           
           return FloatingActionButton(
-            onPressed: () => _showAddSheet(_tabController.index),
+            onPressed: () => _showAddSheet(actualIndex),
             backgroundColor: AppColors.primary,
             child: const Icon(Icons.add, color: Colors.white),
           );
@@ -254,8 +256,8 @@ class _OrdersTab extends StatelessWidget {
       if (orders.isEmpty) {
         return _buildEmptyState(
           icon: Icons.shopping_cart_outlined,
-          title: 'No Orders Yet',
-          subtitle: 'Create the first sales order for this visit.',
+          title: 'No Reservations Yet',
+          subtitle: 'Create the first reservation for this visit.',
           onAdd: onAdd,
         );
       }
@@ -623,7 +625,7 @@ class _AddOrderSheetState extends State<_AddOrderSheet> {
   @override
   Widget build(BuildContext context) {
     return _BaseBottomSheet(
-      title: 'New Sales Order',
+      title: 'New Reservation',
       onSubmit: () {
         if (selectedProduct == null) return;
         final qty = double.tryParse(qtyController.text) ?? 1;
@@ -714,7 +716,7 @@ class _AddOrderSheetState extends State<_AddOrderSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Select Product', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold)),
+        const Text('Select Unit', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         GestureDetector(
           onTap: () => _showProductSelection(),
@@ -727,7 +729,7 @@ class _AddOrderSheetState extends State<_AddOrderSheet> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    selectedProduct?.productName ?? 'Tap to search products...',
+                    selectedProduct?.productName ?? 'Tap to search available units',
                     style: TextStyle(color: selectedProduct == null ? AppColors.textSecondary : AppColors.textPrimary),
                   ),
                 ),
@@ -748,7 +750,7 @@ class _AddOrderSheetState extends State<_AddOrderSheet> {
           children: [
             const Padding(
               padding: EdgeInsets.all(16.0),
-              child: Text('Select Product', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+              child: Text('Select Unit', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
             ),
             Expanded(
               child: Obx(() => ListView.builder(
@@ -804,7 +806,7 @@ class _AddCompetitorRateSheetState extends State<_AddCompetitorRateSheet> {
       title: 'Competitor Rate',
       onSubmit: () {
         if (selectedProduct == null || selectedCompetitor == null) {
-          Get.snackbar('Missing Info', 'Please select product and competitor', backgroundColor: Colors.orange);
+          Get.snackbar('Missing Info', 'Please select unit and competitor', backgroundColor: Colors.orange);
           return;
         }
         final price = double.tryParse(sellPriceController.text) ?? 0;
@@ -913,8 +915,8 @@ class _AddCompetitorRateSheetState extends State<_AddCompetitorRateSheet> {
   Widget _buildProductPicker() {
     return _SelectionBox(
       label: 'Our Product',
-      value: selectedProduct?.productName ?? 'Select product...',
-      onTap: () => _showPicker('Select Product', widget.controller.products, (p) {
+      value: selectedProduct?.productName ?? 'Select unit...',
+      onTap: () => _showPicker('Select Unit', widget.controller.products, (p) {
         setState(() {
           selectedProduct = p as ProductModel;
           sellPriceController.text = selectedProduct!.price?.toString() ?? '';
@@ -1010,7 +1012,7 @@ class _AddOutletRateSheetState extends State<_AddOutletRateSheet> {
       children: [
         _SelectionBox(
           label: 'Product',
-          value: selectedProduct?.productName ?? 'Select product...',
+          value: selectedProduct?.productName ?? 'Select unit...',
           onTap: () => _showProductPicker(),
         ),
         const SizedBox(height: 16),
@@ -1464,7 +1466,7 @@ class _AddStockAvailabilitySheetState extends State<_AddStockAvailabilitySheet> 
       title: 'Stock Availability',
       onSubmit: () {
         if (selectedProduct == null) {
-          Get.snackbar('Missing Info', 'Please select a product', backgroundColor: Colors.orange);
+          Get.snackbar('Missing Info', 'Please select a unit', backgroundColor: Colors.orange);
           return;
         }
         Get.back();
@@ -1481,8 +1483,8 @@ class _AddStockAvailabilitySheetState extends State<_AddStockAvailabilitySheet> 
       children: [
         _SelectionBox(
           label: 'Product',
-          value: selectedProduct?.productName ?? 'Select product...',
-          onTap: () => _showPicker('Select Product', widget.controller.products, (p) => setState(() => selectedProduct = p as ProductModel)),
+          value: selectedProduct?.productName ?? 'Select unit...',
+          onTap: () => _showPicker('Select Unit', widget.controller.products, (p) => setState(() => selectedProduct = p as ProductModel)),
         ),
         const SizedBox(height: 16),
         Row(
@@ -1598,7 +1600,7 @@ class _AddShelfPlacementSheetState extends State<_AddShelfPlacementSheet> {
       title: 'Shelf Placement',
       onSubmit: () {
         if (selectedProduct == null) {
-          Get.snackbar('Missing Info', 'Please select a product', backgroundColor: Colors.orange);
+          Get.snackbar('Missing Info', 'Please select a unit', backgroundColor: Colors.orange);
           return;
         }
         Get.back();
@@ -1617,8 +1619,8 @@ class _AddShelfPlacementSheetState extends State<_AddShelfPlacementSheet> {
       children: [
         _SelectionBox(
           label: 'Product',
-          value: selectedProduct?.productName ?? 'Select product...',
-          onTap: () => _showPicker('Select Product', widget.controller.products, (p) => setState(() => selectedProduct = p as ProductModel)),
+          value: selectedProduct?.productName ?? 'Select unit...',
+          onTap: () => _showPicker('Select Unit', widget.controller.products, (p) => setState(() => selectedProduct = p as ProductModel)),
         ),
         const SizedBox(height: 16),
         Row(
@@ -1740,7 +1742,7 @@ class _AddPromotionAuditSheetState extends State<_AddPromotionAuditSheet> {
       title: 'Promotion Audit',
       onSubmit: () {
         if (selectedProduct == null) {
-          Get.snackbar('Missing Info', 'Please select a product', backgroundColor: Colors.orange);
+          Get.snackbar('Missing Info', 'Please select a unit', backgroundColor: Colors.orange);
           return;
         }
         Get.back();
@@ -1758,8 +1760,8 @@ class _AddPromotionAuditSheetState extends State<_AddPromotionAuditSheet> {
       children: [
         _SelectionBox(
           label: 'Product',
-          value: selectedProduct?.productName ?? 'Select product...',
-          onTap: () => _showPicker('Select Product', widget.controller.products, (p) => setState(() => selectedProduct = p as ProductModel)),
+          value: selectedProduct?.productName ?? 'Select unit...',
+          onTap: () => _showPicker('Select Unit', widget.controller.products, (p) => setState(() => selectedProduct = p as ProductModel)),
         ),
         const SizedBox(height: 16),
         Row(

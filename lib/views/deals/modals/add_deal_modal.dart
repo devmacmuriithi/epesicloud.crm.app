@@ -244,7 +244,7 @@ class _AddDealModalState extends State<AddDealModal> {
                           )
                         else
                           const Text(
-                            'Select a product to view sales stages',
+                            'Select a unit to view sales stages',
                             style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
                           ),
                       ],

@@ -160,7 +160,7 @@ class _AddStockAvailabilitySheetState extends State<_AddStockAvailabilitySheet> 
       title: 'Stock Availability',
       onSubmit: () {
         if (selectedProduct == null) {
-          Get.snackbar('Missing Info', 'Please select a product', backgroundColor: Colors.orange);
+          Get.snackbar('Missing Info', 'Please select a unit', backgroundColor: Colors.orange);
           return;
         }
         widget.controller.addStockAvailability(widget.visitId, {
@@ -177,8 +177,8 @@ class _AddStockAvailabilitySheetState extends State<_AddStockAvailabilitySheet> 
       children: [
         _SelectionBox(
           label: 'Product',
-          value: selectedProduct?.productName ?? 'Select product...',
-          onTap: () => _showPicker('Select Product', widget.controller.products, (p) => setState(() => selectedProduct = p as ProductModel)),
+          value: selectedProduct?.productName ?? 'Select unit...',
+          onTap: () => _showPicker('Select Unit', widget.controller.products, (p) => setState(() => selectedProduct = p as ProductModel)),
         ),
         const SizedBox(height: 16),
         Row(
@@ -267,7 +267,7 @@ class _AddShelfPlacementSheetState extends State<_AddShelfPlacementSheet> {
       title: 'Shelf Placement',
       onSubmit: () {
         if (selectedProduct == null) {
-          Get.snackbar('Missing Info', 'Please select a product', backgroundColor: Colors.orange);
+          Get.snackbar('Missing Info', 'Please select a unit', backgroundColor: Colors.orange);
           return;
         }
         widget.controller.addShelfPlacement(widget.visitId, {
@@ -286,8 +286,8 @@ class _AddShelfPlacementSheetState extends State<_AddShelfPlacementSheet> {
       children: [
         _SelectionBox(
           label: 'Product',
-          value: selectedProduct?.productName ?? 'Select product...',
-          onTap: () => _showPicker('Select Product', widget.controller.products, (p) => setState(() => selectedProduct = p as ProductModel)),
+          value: selectedProduct?.productName ?? 'Select unit...',
+          onTap: () => _showPicker('Select Unit', widget.controller.products, (p) => setState(() => selectedProduct = p as ProductModel)),
         ),
         const SizedBox(height: 16),
         Row(
@@ -382,7 +382,7 @@ class _AddPromotionAuditSheetState extends State<_AddPromotionAuditSheet> {
       title: 'Promotion Audit',
       onSubmit: () {
         if (selectedProduct == null) {
-          Get.snackbar('Missing Info', 'Please select a product', backgroundColor: Colors.orange);
+          Get.snackbar('Missing Info', 'Please select a unit', backgroundColor: Colors.orange);
           return;
         }
         widget.controller.addPromotionAudit(widget.visitId, {
@@ -400,8 +400,8 @@ class _AddPromotionAuditSheetState extends State<_AddPromotionAuditSheet> {
       children: [
         _SelectionBox(
           label: 'Product',
-          value: selectedProduct?.productName ?? 'Select product...',
-          onTap: () => _showPicker('Select Product', widget.controller.products, (p) => setState(() => selectedProduct = p as ProductModel)),
+          value: selectedProduct?.productName ?? 'Select unit...',
+          onTap: () => _showPicker('Select Unit', widget.controller.products, (p) => setState(() => selectedProduct = p as ProductModel)),
         ),
         const SizedBox(height: 16),
         Row(

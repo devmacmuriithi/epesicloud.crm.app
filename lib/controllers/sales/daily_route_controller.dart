@@ -4,6 +4,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../models/fieldforce_models.dart';
 import '../../Services/fieldforce_service.dart';
+import 'visits_controller.dart';
 
 class DailyRouteController extends GetxController {
   final FieldforceService _service = Get.find<FieldforceService>();
@@ -101,11 +102,15 @@ class DailyRouteController extends GetxController {
         checkInLongitude: position?.longitude,
       );
 
-      await _service.startVisit(request);
+      final responseMap = await _service.startVisit(request);
       Get.back();
       Get.snackbar('Visit Active', 'Visit successfully started',
           backgroundColor: Colors.green, colorText: Colors.white);
       fetchDailyRoute();
+
+      final visitRecord = VisitRecord.fromJson(responseMap);
+      final visitsController = Get.find<VisitsController>();
+      visitsController.goToVisitDetails(visitRecord);
     } catch (e) {
       Get.back();
       Get.snackbar('Error', e.toString(),

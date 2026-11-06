@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:flutter/widgets.dart';
 import 'app_exceptions.dart';
+import 'auth_service.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart';
 
@@ -244,7 +246,9 @@ class BaseService {
         String errMsg = _extractErrorMessage(body);
         throw BadRequestException(errMsg, url);
       case 401:
-        _handleUnauthorized();
+        if (!_isAuthEndpoint(url)) {
+          _handleUnauthorized();
+        }
         throw UnAuthorizedException(_extractErrorMessage(body), url);
       case 403:
         throw UnAuthorizedException(_extractErrorMessage(body), url);
@@ -276,13 +280,35 @@ class BaseService {
   }
 
 
+  bool _isAuthEndpoint(String url) {
+    return url.contains('/api/agent-auth/login') ||
+        url.contains('/api/auth/') ||
+        url.contains('/login');
+  }
+
   void _handleUnauthorized() {
     print("Unauthorized access detected. Triggering logout.");
     try {
-      // Clear storage and navigate to login
+      // Clear token and local storage
+      _token = null;
       GetStorage().remove("access_token");
       GetStorage().remove("user_data");
-      Get.offAllNamed('/login');
+
+      // Reset AuthService state if registered
+      if (Get.isRegistered<AuthService>()) {
+        final auth = Get.find<AuthService>();
+        auth.currentUser.value = null;
+        auth.isLoggedIn.value = false;
+      }
+
+      // Safely navigate to login only if not already on /login
+      if (Get.currentRoute != '/login') {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (Get.currentRoute != '/login') {
+            Get.offAllNamed('/login');
+          }
+        });
+      }
     } catch (e) {
       print("Error during global logout: $e");
     }

@@ -64,29 +64,38 @@ class _DealsViewState extends State<DealsView> {
               child: _buildSearchAndFilters(controller),
             ),
             Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value && controller.deals.isEmpty) {
-                  return const Center(child: CircularProgressIndicator(color: AppColors.primary));
-                }
+              child: RefreshIndicator(
+                onRefresh: () => controller.fetchDeals(),
+                color: AppColors.primary,
+                child: Obx(() {
+                  if (controller.isLoading.value && controller.deals.isEmpty) {
+                    return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+                  }
 
-                if (controller.deals.isEmpty) {
-                  return const Center(
-                    child: Text('No deals found', style: TextStyle(color: AppColors.textSecondary)),
-                  );
-                }
+                  if (controller.deals.isEmpty) {
+                    return ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.5,
+                          child: const Center(
+                            child: Text('No deals found', style: TextStyle(color: AppColors.textSecondary)),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
 
-                return RefreshIndicator(
-                  onRefresh: () => controller.fetchDeals(),
-                  color: AppColors.primary,
-                  child: ListView.builder(
+                  return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
+                    physics: const AlwaysScrollableScrollPhysics(),
                     itemCount: controller.deals.length,
                     itemBuilder: (context, index) {
                       return _buildDealCard(controller.deals[index], controller);
                     },
-                  ),
-                );
-              }),
+                  );
+                }),
+              ),
             ),
           ],
         ),

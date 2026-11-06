@@ -25,21 +25,29 @@ class DailyRouteView extends StatelessWidget {
           }
 
           if (controller.hasError.value) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, color: Colors.red, size: 48),
-                  const SizedBox(height: 16),
-                  Text(controller.errorMessage.value,
-                      style: const TextStyle(color: AppColors.textSecondary)),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: controller.fetchDailyRoute,
-                    child: const Text('Retry'),
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                        const SizedBox(height: 16),
+                        Text(controller.errorMessage.value,
+                            style: const TextStyle(color: AppColors.textSecondary)),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: controller.fetchDailyRoute,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           }
 
@@ -251,7 +259,12 @@ class DailyRouteView extends StatelessWidget {
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold)),
                         ),
+                        const SizedBox(width: 8),
                         _buildStatusBadge(state),
+                        if (isVisited && stop.visit != null) ...[
+                          const SizedBox(width: 8),
+                          const Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 20),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -351,6 +364,8 @@ class DailyRouteView extends StatelessWidget {
               ),
             ),
             const Icon(Icons.check_circle, color: Colors.green, size: 20),
+            const SizedBox(width: 8),
+            const Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 20),
           ],
         ),
       ),
